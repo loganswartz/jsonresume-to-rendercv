@@ -64,14 +64,16 @@ class JSONResumeConverter:
                 self.render_cv["cv"]["sections"][key] = section
 
     def format_location(self, location):
-        if location:
-            return f"{location['city']}, {location['countryCode']}"
-        return ""
+        if not location:
+            return ""
+
+        parts = [location["city"], location["region"], location["countryCode"]]
+        return ", ".join(part for part in parts if part)
 
     def format_social_networks(self, profiles):
         social_networks = []
         for profile in profiles:
-            network = self.networks.get(profile["network"])
+            network = self.networks.get(profile["network"].lower())
             if not network:
                 print(f"Falling back to default network: {self.default_network}")
                 network = self.networks.get(self.default_network)
@@ -102,7 +104,7 @@ class JSONResumeConverter:
             {
                 "company": job["name"],
                 "position": job["position"],
-                "location": job.get("location", ""),
+                "location": job.get("location"),
                 "start_date": job["startDate"],
                 "end_date": job.get("endDate", "present"),
                 "highlights": job.get("highlights", []),
@@ -132,8 +134,11 @@ class JSONResumeConverter:
         return [
             {
                 "name": proj["name"],
-                "date": proj.get("startDate", ""),
-                "highlights": [proj["description"]] if "description" in proj else [],
+                "location": proj.get("location"),
+                "start_date": proj["startDate"],
+                "end_date": proj.get("endDate", "present"),
+                "summary": proj.get("description", ""),
+                "highlights": proj.get("highlights", []),
             }
             for proj in projects
         ]
@@ -144,15 +149,9 @@ class JSONResumeConverter:
         ]
 
     def format_technologies(self, skills):
-        languages = next(
-            (skill["keywords"] for skill in skills if skill["name"] == "Languages"), []
-        )
-        software = next(
-            (skill["keywords"] for skill in skills if skill["name"] == "Software"), []
-        )
         return [
-            {"label": "Languages", "details": ", ".join(languages)},
-            {"label": "Software", "details": ", ".join(software)},
+            {"label": skill["name"], "details": ", ".join(skill["keywords"])}
+            for skill in skills
         ]
 
     def convert(self):
