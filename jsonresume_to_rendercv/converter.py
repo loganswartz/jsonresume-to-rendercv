@@ -56,6 +56,7 @@ class JSONResumeConverter:
             "projects": self.format_projects(json_resume.get("projects", [])),
             "technologies": self.format_technologies(json_resume.get("skills", [])),
             "awards": self.format_awards(json_resume.get("awards", [])),
+            "references": self.format_references(json_resume.get("references", [])),
         }
 
         # Removing optional sections when empty
@@ -153,6 +154,22 @@ class JSONResumeConverter:
             {"label": skill["name"], "details": ", ".join(skill["keywords"])}
             for skill in skills
         ]
+
+    def format_reference(self, reference):
+        label = reference["name"]
+        details = reference["reference"]
+
+        if label == "" and details == "":
+            return ""
+        elif label == "":
+            return details
+        elif details == "":
+            return f"**{label}**"
+        else:
+            return {"label": label, "details": details}
+
+    def format_references(self, references):
+        return [self.format_reference(reference) for reference in references]
 
     def convert(self):
         return yaml.dump(self.render_cv, sort_keys=False)
