@@ -54,7 +54,7 @@ class JSONResumeConverter:
                 json_resume.get("publications", [])
             ),
             "projects": self.format_projects(json_resume.get("projects", [])),
-            "technologies": self.format_technologies(json_resume.get("skills", [])),
+            "skills": self.format_skills(json_resume.get("skills", [])),
             "awards": self.format_awards(json_resume.get("awards", [])),
             "references": self.format_references(json_resume.get("references", [])),
         }
@@ -149,7 +149,7 @@ class JSONResumeConverter:
             {"label": award["title"], "details": award["awarder"]} for award in awards
         ]
 
-    def format_technologies(self, skills):
+    def format_skills(self, skills):
         return [
             {"label": skill["name"], "details": ", ".join(skill["keywords"])}
             for skill in skills
